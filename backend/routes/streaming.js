@@ -183,22 +183,38 @@ router.get('/recordings', authMiddleware, async (req, res) => {
 router.get('/status', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
-    const userLogin = req.user.email.split('@')[0];
     
     // Inicializar serviço Wowza com dados do usuário
     const wowzaService = new WowzaStreamingService();
     const initialized = await wowzaService.initializeFromDatabase(userId);
     
     if (!initialized) {
-      return res.status(500).json({ 
-        success: false, 
-        error: 'Erro ao conectar com servidor de streaming' 
+      return res.json({ 
+        success: true, 
+        is_live: false, 
+        transmission: null,
+        obs_stream: null
       });
     }
 
     // Verificar também se há stream OBS ativo
     const obsStats = await wowzaService.getOBSStreamStats(userId);
     
+    const [transmissionRows] = await db.execute(
+      `SELECT 
+        t.codigo as id,
+        t.titulo,
+        t.status,
+        t.data_inicio,
+        t.codigo_playlist,
+        t.wowza_stream_id
+       FROM transmissoes t
+       WHERE t.codigo_stm = ? AND t.status = 'ativa'
+       ORDER BY t.data_inicio DESC
+       LIMIT 1`,
+      [userId]
+    );
+
     // Se não há transmissão de playlist, verificar OBS
     if (transmissionRows.length === 0 && obsStats.isLive) {
       return res.json({
@@ -216,23 +232,20 @@ router.get('/status', authMiddleware, async (req, res) => {
       });
     }
 
-    const [transmissionRows] = await db.execute(
-      `SELECT 
-        t.codigo as id,
-        t.titulo,
-        t.status,
-        t.data_inicio,
-        t.codigo_playlist,
-        t.wowza_stream_id
-       FROM transmissoes t
-       WHERE t.codigo_stm = ? AND t.status = 'ativa'
-       ORDER BY t.data_inicio DESC
-       LIMIT 1`,
-      [userId]
-    );
-
     if (transmissionRows.length === 0) {
-      return res.json({ success: true, is_live: false, transmission: null });
+      return res.json({ 
+        success: true, 
+        is_live: false, 
+        transmission: null,
+        obs_stream: obsStats.isLive ? {
+          is_live: obsStats.isLive,
+          viewers: obsStats.viewers,
+          bitrate: obsStats.bitrate,
+          uptime: obsStats.uptime,
+          recording: obsStats.recording,
+          platforms: obsStats.platforms || []
+        } : null
+      });
     }
 
     const transmission = transmissionRows[0];

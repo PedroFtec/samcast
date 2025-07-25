@@ -18,6 +18,7 @@
   const logosRoutes = require('./routes/logos');
   const transmissionSettingsRoutes = require('./routes/transmission-settings');
   const ftpRoutes = require('./routes/ftp');
+  const userSettingsRoutes = require('./routes/user-settings');
   // const serversRoutes = require('./routes/servers');
 
   const app = express();
@@ -85,6 +86,7 @@
   app.use('/api/logos', logosRoutes);
   app.use('/api/transmission-settings', transmissionSettingsRoutes);
   app.use('/api/ftp', ftpRoutes);
+  app.use('/api/user-settings', userSettingsRoutes);
   // app.use('/api/servers', serversRoutes);
 
   // Rota de teste
