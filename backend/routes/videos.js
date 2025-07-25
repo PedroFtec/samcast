@@ -176,7 +176,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     }
 
     const video = videoRows[0];
-    const userEmail = req.user.email.split('@')[0];
+    const userEmail = req.user.email ? req.user.email.split('@')[0] : `user_${userId}`;
 
     // Verificar se o vídeo pertence ao usuário
     if (!video.path_video.includes(`/${userEmail}/`)) {

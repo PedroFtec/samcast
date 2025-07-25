@@ -19,7 +19,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ playlistVideo, onVideoEnd }) 
   const [obsStreamActive, setObsStreamActive] = useState(false);
   const [obsStreamUrl, setObsStreamUrl] = useState<string>('');
 
-  const userLogin = user?.email?.split('@')[0] || 'usuario';
+  const userLogin = user?.email?.split('@')[0] || `user_${user?.id || 'usuario'}`;
 
   useEffect(() => {
     // Verificar se há stream OBS ativo

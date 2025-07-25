@@ -12,7 +12,7 @@ const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
     try {
       const userId = req.user.id;
-      const userEmail = req.user.email.split('@')[0];
+      const userEmail = req.user.email ? req.user.email.split('@')[0] : `user_${userId}`;
       
       // Caminho para logos: /usr/local/WowzaStreamingEngine/content/{userEmail}/logos/
       const logoPath = `/usr/local/WowzaStreamingEngine/content/${userEmail}/logos`;
@@ -57,7 +57,7 @@ const upload = multer({
 router.get('/', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
-    const userEmail = req.user.email.split('@')[0];
+    const userEmail = req.user.email ? req.user.email.split('@')[0] : `user_${userId}`;
 
     const [rows] = await db.execute(
       `SELECT 
@@ -95,7 +95,7 @@ router.post('/', authMiddleware, upload.single('logo'), async (req, res) => {
 
     const { nome } = req.body;
     const userId = req.user.id;
-    const userEmail = req.user.email.split('@')[0];
+    const userEmail = req.user.email ? req.user.email.split('@')[0] : `user_${userId}`;
 
     if (!nome) {
       return res.status(400).json({ error: 'Nome da logo é obrigatório' });
@@ -142,7 +142,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     }
 
     const logo = logoRows[0];
-    const userEmail = req.user.email.split('@')[0];
+    const userEmail = req.user.email ? req.user.email.split('@')[0] : `user_${userId}`;
 
     // Remover arquivo físico
     try {

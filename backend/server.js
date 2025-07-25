@@ -42,9 +42,10 @@
 
   // Servir arquivos estáticos do Wowza
   app.use('/content', express.static('/usr/local/WowzaStreamingEngine/content', {
-    maxAge: '1h', // Cache por 1 hora
+    maxAge: '1h',
     etag: true,
     lastModified: true,
+    index: false,
     setHeaders: (res, path) => {
       // Configurar headers CORS para vídeos
       res.setHeader('Access-Control-Allow-Origin', '*');
@@ -55,8 +56,54 @@
       // Headers para cache de vídeos
       if (path.match(/\.(mp4|avi|mov|wmv|flv|webm|mkv)$/i)) {
         res.setHeader('Cache-Control', 'public, max-age=3600');
-        res.setHeader('Content-Type', 'video/mp4');
+        // Deixar o express detectar o tipo automaticamente
       }
+    },
+    fallthrough: false
+  }));
+
+  // Middleware para tratar erros de arquivos não encontrados
+  app.use('/content', (req, res, next) => {
+    res.status(404).json({ 
+      error: 'Arquivo não encontrado',
+      path: req.path,
+      message: 'O arquivo de vídeo solicitado não foi encontrado no servidor'
+    });
+  });
+
+  // Middleware para OPTIONS requests
+  app.options('/content/*', (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Range');
+    res.status(200).end();
+  });
+
+  // Rota específica para testar acesso a vídeos
+  app.get('/api/test-video/:userEmail/:folderId/:fileName', async (req, res) => {
+    try {
+      const { userEmail, folderId, fileName } = req.params;
+      const videoPath = `/usr/local/WowzaStreamingEngine/content/${userEmail}/${folderId}/${fileName}`;
+      
+      const fs = require('fs').promises;
+      
+      try {
+        const stats = await fs.stat(videoPath);
+        res.json({
+          exists: true,
+          size: stats.size,
+          path: videoPath,
+          url: `/content/${userEmail}/${folderId}/${fileName}`
+        });
+      } catch (error) {
+        res.json({
+          exists: false,
+          path: videoPath,
+          error: error.message
+        });
+      }
+    } catch (error) {
+      res.status(500).json({ error: 'Erro ao verificar arquivo' });
     }
   }));
   

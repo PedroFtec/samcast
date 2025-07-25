@@ -50,7 +50,7 @@ const DadosConexao: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [warnings, setWarnings] = useState<string[]>([]);
   
-  const userLogin = user?.email?.split('@')[0] || 'usuario';
+  const userLogin = user?.email?.split('@')[0] || `user_${user?.id || 'usuario'}`;
   
   useEffect(() => {
     loadOBSConfig();

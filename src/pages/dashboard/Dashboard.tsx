@@ -47,7 +47,7 @@ const Dashboard: React.FC = () => {
   const [isPlayingPlaylist, setIsPlayingPlaylist] = useState(false);
   const [showPlaylistModal, setShowPlaylistModal] = useState(false);
 
-  useEffect(() => {
+  const userLogin = user?.email?.split('@')[0] || `user_${user?.id || 'usuario'}`;
     loadPlaylists();
     checkOBSStatus();
     

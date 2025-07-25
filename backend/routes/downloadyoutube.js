@@ -11,7 +11,7 @@ router.post('/', authMiddleware, async (req, res) => {
   try {
     const { url, id_pasta } = req.body;
     const userId = req.user.id;
-    const userEmail = req.user.email.split('@')[0];
+    const userEmail = req.user.email ? req.user.email.split('@')[0] : `user_${userId}`;
 
     if (!url || !id_pasta) {
       return res.status(400).json({ error: 'URL e pasta são obrigatórios' });

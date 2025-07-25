@@ -31,7 +31,7 @@ const Players: React.FC = () => {
     theme: 'dark'
   });
 
-  const userLogin = user?.email?.split('@')[0] || 'usuario';
+  const userLogin = user?.email?.split('@')[0] || `user_${user?.id || 'usuario'}`;
   const streamUrl = `http://samhost.wcore.com.br:1935/samhost/${userLogin}_live/playlist.m3u8`;
   const embedUrl = `http://samhost.wcore.com.br/embed/${userLogin}`;
 

@@ -85,8 +85,8 @@ function ModalVideo({
     
     // Se é uma URL relativa, construir a URL completa
     // Verificar se estamos em produção ou desenvolvimento
-    const isProduction = window.location.hostname !== 'localhost';
-    const baseUrl = isProduction ? 'http://samhost.wcore.com.br' : window.location.origin;
+    const isProduction = window.location.hostname === 'samhost.wcore.com.br';
+    const baseUrl = isProduction ? 'http://samhost.wcore.com.br' : 'http://localhost:3000';
     
     // Garantir que a URL comece com /content
     const videoPath = video.url.startsWith('/content') ? video.url : `/content${video.url}`;

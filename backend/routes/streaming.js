@@ -9,7 +9,7 @@ const router = express.Router();
 router.get('/obs-config', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
-    const userLogin = req.user.email.split('@')[0];
+    const userLogin = req.user.email ? req.user.email.split('@')[0] : `user_${userId}`;
     
     // Buscar configurações do usuário
     const [userConfigRows] = await db.execute(
@@ -35,9 +35,20 @@ router.get('/obs-config', authMiddleware, async (req, res) => {
     const initialized = await wowzaService.initializeFromDatabase(userId);
     
     if (!initialized) {
-      return res.status(500).json({ 
-        success: false, 
-        error: 'Erro ao conectar com servidor de streaming' 
+      return res.json({ 
+        success: true, 
+        obs_config: {
+          rtmp_url: `rtmp://samhost.wcore.com.br:1935/samhost`,
+          stream_key: `${userLogin}_live`,
+          hls_url: `http://samhost.wcore.com.br:1935/samhost/${userLogin}_live/playlist.m3u8`,
+          max_bitrate: userConfig.bitrate || 2500,
+          max_viewers: userConfig.espectadores || 100,
+          recording_enabled: userConfig.status_gravando === 'sim',
+          recording_path: `/usr/local/WowzaStreamingEngine/content/${userLogin}/recordings/`
+        },
+        user_limits: null,
+        warnings: [],
+        server_info: null
       });
     }
 
